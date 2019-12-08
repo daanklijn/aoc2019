@@ -9,12 +9,13 @@ n = w*h
 layers = [data[i:i+n] for i in range(0, len(data), n)]
 
 #1
-# min = 1000
-# for layer in layers:
-#     if(layer.count('0')<min):
-#         min = layer.count('0')
-#         print(layer.count('1')*layer.count('2'))
+min = 1000
+for layer in layers:
+    if(layer.count('0')<min):
+        min = layer.count('0')
+        print(layer.count('1')*layer.count('2'))
 
+#2
 def row_to_image(row):
     result = ''
     for number in row:
