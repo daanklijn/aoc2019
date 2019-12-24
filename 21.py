@@ -1,5 +1,6 @@
 from aocd.models import Puzzle
 import numpy as np
+import math
 
 def get_value(mode,position,code,relative_base):
     if(mode==0):
@@ -19,8 +20,7 @@ def get_location(mode,position,code,relative_base):
     else:
         print("Cannot get location for other mode")
 
-def run_intcode(code,input_vars,position=0,relative_base=0):
-    var_count=0
+def run_intcode(code,input_vars,position=0,relative_base=0,var_count=0):
     prints=0
 
     while(True):
@@ -57,7 +57,7 @@ def run_intcode(code,input_vars,position=0,relative_base=0):
             a = get_value(mode1,position+1,code,relative_base)
             position+=2
             # print("RETURN:" + str(a))
-            return(a,code,position,relative_base)
+            return(a,code,position,relative_base,var_count)
         elif(opcode == 5):
             a = get_value(mode1,position+1,code,relative_base)
             b = get_value(mode2,position+2,code,relative_base)
@@ -106,47 +106,36 @@ def run_intcode(code,input_vars,position=0,relative_base=0):
         else:
             print("wrong op" + str(instruction))
 
-data = Puzzle(year=2019, day=13).input_data.split(',')
-code = list(minpap(lambda x : int(x),data))+list(np.zeros(1000))
-code[0]=2
+
+data = Puzzle(year=2019, day=21).input_data.split(',')
+code = list(map(lambda x : int(x),data))+list(np.zeros(10000))
+print(code)
+
+inputs = """NOT C J
+AND D J
+NOT B T
+AND D T
+OR T J
+NOT A T
+AND D T
+OR T J
+RUN
+"""
+inputs = list(map(lambda x: ord(x),inputs))
+
+var_count=0
 position = 0
-base = 0
-outputs = []
-input_i=0
+base = 0 
+row = ''
+clear = lambda: os.system('clear')
+result = ''
 
-TYPE_OBJECT_HASH = {
-    0: ' ',
-    1: '|',
-    2: '#',
-    3: '_',
-    4: 'o'
-}
-
-grid = np.full([25,50],' ')
-score = 0
-player_x=0
-ball_x=0
-while True:
+while(True):
     try:
-        if(player_x==ball_x):
-            inp = [0]
-        elif(player_x<ball_x):
-            inp = [1]
-        else:
-            inp  = [-1]
-        x, code, position, base = run_intcode(code,inp,position,base)
-        y, code, position, base = run_intcode(code,inp,position,base)
-        block_type, code, position, base = run_intcode(code,inp,position,base)
-        if(block_type==3):
-            player_x=x
-        if(block_type==4):
-            ball_x=x
-        if(x==-1 and y==0):
-            score=block_type
-        else:
-            grid[y][x]=TYPE_OBJECT_HASH[block_type]
+        output,code,position,base, var_count = run_intcode(code,inputs,position,base,var_count)
+        result+=chr(output)
     except:
         break
-    print("SCORE:"+str(score))
-    for row in grid:
-        print(''.join(row))
+    
+print(result)
+
