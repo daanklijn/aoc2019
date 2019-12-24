@@ -1,7 +1,6 @@
 from aocd.models import Puzzle
 import numpy as np
 import math
-import os
 
 def get_value(mode,position,code,relative_base):
     if(mode==0):
@@ -21,7 +20,8 @@ def get_location(mode,position,code,relative_base):
     else:
         print("Cannot get location for other mode")
 
-def run_intcode(code,input_vars,position=0,relative_base=0,var_count=0):
+def run_intcode(code,input_vars,position=0,relative_base=0):
+    var_count=0
     prints=0
 
     while(True):
@@ -51,13 +51,14 @@ def run_intcode(code,input_vars,position=0,relative_base=0,var_count=0):
         elif(opcode == 3):
             a = get_location(mode1,position+1,code,relative_base)
             code[a] = input_vars[var_count]
+
             var_count+=1
             position+=2
         elif(opcode == 4):
             a = get_value(mode1,position+1,code,relative_base)
             position+=2
             # print("RETURN:" + str(a))
-            return(a,code,position,relative_base,var_count)
+            return(a,code,position,relative_base)
         elif(opcode == 5):
             a = get_value(mode1,position+1,code,relative_base)
             b = get_value(mode2,position+2,code,relative_base)
@@ -107,32 +108,28 @@ def run_intcode(code,input_vars,position=0,relative_base=0,var_count=0):
             print("wrong op" + str(instruction))
 
 
-data = Puzzle(year=2019, day=17).input_data.split(',')
+data = Puzzle(year=2019, day=19).input_data.split(',')
 code = list(map(lambda x : int(x),data))+list(np.zeros(10000))
 
-code[0]=2
+position= 0
+base = 0
+sum =0
+grid = []
+first=0
+done = False
+for x in range(500,1000):
+    grid.append([])
+    for y in range(first,1000):
+        output, code2, position2, base2 = run_intcode(code.copy(),[x,y],position,base)
+        if(output==1):
+            print(first)
+            first=x
+            output1, code2, position2, base2 = run_intcode(code.copy(),[x-99,y+99],position,base)
+            if(output1==1):
+                print(str(x-99)+","+str(y))
+                done = True
+            break
+    if(done):
+        break
 
-inputs = """A,B,A,B,C,B,A,C,B,C
-L,12,L,8,R,10,R,10
-L,6,L,4,L,12
-R,10,L,8,L,4,R,10
-N
-"""
-inputs = list(map(lambda x: ord(x),inputs))
 
-var_count=0
-position = 0
-base = 0 
-row = ''
-clear = lambda: os.system('clear')
-previous=-1
-
-while(True):
-    output,code,position,base, var_count = run_intcode(code,inputs,position,base,var_count)
-    if(output==10 and previous==10):
-        clear()
-        print(row)
-        row=''
-    else:
-        row+=chr(output)
-    previous=output
